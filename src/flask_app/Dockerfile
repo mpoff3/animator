@@ -13,6 +13,13 @@ RUN uv venv && \
     /bin/bash -c "source .venv/bin/activate && \
     uv pip install -e ."
 
+# Expose port 5000
+EXPOSE 5000
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_APP=app.py
+
 # Run the app when container starts
 CMD ["/bin/bash", "-c", "source .venv/bin/activate && python app.py"]
 

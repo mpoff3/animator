@@ -14,5 +14,7 @@ dependencies = [
 
 [tool.setuptools]
 py-modules = ["app"]
-packages = []
-exclude = ["media", "generated_scripts", "templates"]
+
+[tool.setuptools.packages.find]
+include = ["*"]
+exclude = ["media*", "generated_scripts*", "templates*"]
