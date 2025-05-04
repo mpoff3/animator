@@ -15,10 +15,8 @@ export default function SearchInterface() {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
-  const [searchResult, setSearchResult] = useState<{
-    explanation: string
-    videoUrl: string | null
-  } | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [explanation, setExplanation] = useState<string | null>(null)
   const [searchError, setSearchError] = useState<string | null>(null)
 
   // Load search history from localStorage on component mount
@@ -46,7 +44,8 @@ export default function SearchInterface() {
     if (!query.trim() || isSearching) return
 
     setIsSearching(true)
-    setSearchResult(null)
+    setExplanation(null)
+    setVideoUrl(null)
     setSearchError(null) // Clear previous errors
 
     // Add to history (keep only last 5)
@@ -59,10 +58,18 @@ export default function SearchInterface() {
       const formData = new FormData()
       formData.append("question", query)
 
-      const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
-        method: "POST",
-        body: formData,
-      })
+      // const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
+      //   method: "POST",
+      //   body: formData,
+      // })
+      const response = { // Placeholder for testing
+        ok: true,
+        status: 200,
+        json: async () => ({
+          error: false,
+          video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        })
+      }
 
       if (!response.ok) {
         // Handle HTTP errors (e.g., 404, 500)
@@ -72,11 +79,9 @@ export default function SearchInterface() {
       const data = await response.json()
 
       if (data.video_url) {
-        setSearchResult({
-          // Using placeholder for explanation as requested
-          explanation: `Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`,
-          videoUrl: data.video_url,
-        })
+        // Using placeholder for explanation as requested
+        setExplanation(`Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`);
+        setVideoUrl(data.video_url)
       } else if (data.error) {
         // Handle errors reported by the backend API
         setSearchError(`API Error: ${data.error}`)
@@ -223,7 +228,7 @@ export default function SearchInterface() {
             <SkeletonLoader type="text" />
             <SkeletonLoader type="video" />
           </motion.div>
-        ) : searchResult ? (
+        ) : (videoUrl || explanation) ? (
           <motion.div
             key="results"
             initial={{ opacity: 0, y: 20 }}
@@ -237,7 +242,7 @@ export default function SearchInterface() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
                 <div className="prose dark:prose-invert">
-                  <p className="text-slate-700 dark:text-slate-300">{searchResult.explanation}</p>
+                  <p className="text-slate-700 dark:text-slate-300">{explanation}</p>
                 </div>
               </motion.div>
             </Card>
@@ -249,8 +254,8 @@ export default function SearchInterface() {
                   Video Visualization
                 </h2>
                 <div className="aspect-video">
-                  {searchResult.videoUrl ? (
-                    <VideoPlayer videoUrl={searchResult.videoUrl} />
+                  {videoUrl ? (
+                    <VideoPlayer videoUrl={videoUrl} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800">
                       <p className="text-slate-500 dark:text-slate-400">No video available</p>
