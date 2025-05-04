@@ -54,10 +54,15 @@ export default function SearchInterface() {
       return newHistory.slice(0, 5)
     })
 
+    await Promise.all([queryExplanation(query), queryVideo(query)])
+  }
+  const queryExplanation = async (query: string) => {
+    setExplanation(`Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`);
+  }
+  const queryVideo = async (query: string) => {
     try {
-      const formData = new FormData()
-      formData.append("question", query)
-
+      // const formData = new FormData()
+      // formData.append("question", query)
       // const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
       //   method: "POST",
       //   body: formData,
@@ -79,8 +84,6 @@ export default function SearchInterface() {
       const data = await response.json()
 
       if (data.video_url) {
-        // Using placeholder for explanation as requested
-        setExplanation(`Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`);
         setVideoUrl(data.video_url)
       } else if (data.error) {
         // Handle errors reported by the backend API
