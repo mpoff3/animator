@@ -80,11 +80,31 @@ TODO -- fix 'xdg-open'issue
 Tag the image for GCR:
 
 ```
-docker tag mathlens us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens
+docker tag mathlens us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens-beta
 ```
 
 Push it:
 
 ```
-docker push us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens:latest
+docker push us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens-beta:latest
+```
+
+## Calling the function
+
+```
+    const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+      method: "POST",
+      body: {
+        question: "How do you multiply a matrix by a vector?",
+        prompt: "The prompt...",
+      }
+    });
+```
+
+    This returns the payload:
+
+```json
+    {
+        "video_url": video_path,
+    }
 ```

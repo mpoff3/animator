@@ -7,3 +7,4 @@ __pycache__
 *.mp4
 src/flask_app/generated_scripts
 src/flask_app/media
+src/flask_app/
