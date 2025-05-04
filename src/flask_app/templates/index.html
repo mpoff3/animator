@@ -24,6 +24,7 @@
       const video = document.getElementById("outputVideo");
       video.src = data.video_url;
       video.style.display = "block";
+      console.log("Video URL:", data.video_url);
     } else {
       alert("Error: " + data.error);
     }
