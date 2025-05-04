@@ -74,3 +74,17 @@ docker run -p 5000:5000 \
 ```
 
 TODO -- fix 'xdg-open'issue
+
+## Delploying to GCP
+
+Tag the image for GCR:
+
+```
+docker tag mathlens us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens
+```
+
+Push it:
+
+```
+docker push us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens:latest
+```
