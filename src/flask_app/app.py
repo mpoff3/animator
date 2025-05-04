@@ -3,14 +3,33 @@ import re
 import uuid
 import subprocess
 import shutil
+import logging
+import traceback
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 from openai import OpenAI
 
+# Set up logging
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # Initialize Flask and OpenAI
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
-client = OpenAI()
+
+# Check for API key
+if not os.environ.get("OPENAI_API_KEY"):
+    logger.warning("OPENAI_API_KEY environment variable is not set!")
+    logger.warning("Set it with: export OPENAI_API_KEY=your_api_key_here")
+
+# Initialize OpenAI client
+try:
+    client = OpenAI()
+    logger.info("OpenAI client initialized successfully")
+except Exception as e:
+    logger.error(f"Error initializing OpenAI client: {str(e)}")
+    client = None
 
 # Directory setup
 OUTPUT_DIR = "generated_scripts"
@@ -31,6 +50,10 @@ def generate():
     if not question or not custom_prompt:
         return jsonify({"error": "Missing question or prompt"}), 400
 
+    # Check if OpenAI client is available
+    if client is None:
+        return jsonify({"error": "OpenAI client not initialized. Check API key."}), 500
+
     scene_name = "GeneratedScene"
     script_id = uuid.uuid4().hex[:8]
     script_file = os.path.join(OUTPUT_DIR, f"{script_id}.py")
@@ -39,13 +62,20 @@ def generate():
     full_prompt = custom_prompt.replace("{QUESTION}", question).replace("{SCENE_NAME}", scene_name)
 
     try:
+        logger.info(f"Sending request to OpenAI for question: {question}")
         # Call OpenAI GPT-4
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": full_prompt}],
-            temperature=0.3,
-        )
-        content = response.choices[0].message.content
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[{"role": "user", "content": full_prompt}],
+                temperature=0.3,
+            )
+            content = response.choices[0].message.content
+            logger.info("Successfully received response from OpenAI")
+        except Exception as api_error:
+            logger.error(f"OpenAI API error: {str(api_error)}")
+            return jsonify({"error": f"OpenAI API error: {str(api_error)}"}), 500
+            
         code = extract_code(content)
         code = auto_fix_code(code)
 
@@ -89,7 +119,10 @@ def generate():
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        error_details = traceback.format_exc()
+        logger.error(f"Error in generate endpoint: {str(e)}")
+        logger.error(error_details)
+        return jsonify({"error": str(e), "details": error_details}), 500
 
 @app.route("/video/<folder>/<filename>")
 def serve_video(folder, filename):

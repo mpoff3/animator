@@ -1,5 +1,7 @@
 import requests
 import json
+import os
+import time
 
 
 def test_generate():
@@ -45,18 +47,31 @@ The script must run with manim -pql script.py {SCENE_NAME} without errors
 """,
     }
 
-    # Send POST request
-    print("Sending request to generate endpoint...")
-    response = requests.post(url, data=data)
+    # Check if OPENAI_API_KEY is set
+    if not os.environ.get("OPENAI_API_KEY"):
+        print("WARNING: OPENAI_API_KEY environment variable is not set.")
+        print("Set it with: export OPENAI_API_KEY=your_api_key_here")
 
-    # Print response
-    print(f"Status code: {response.status_code}")
-    if response.status_code == 200:
-        result = response.json()
-        print(json.dumps(result, indent=2))
-        print(f"\nVideo URL: {result.get('static_video_url')}")
-    else:
-        print(f"Error: {response.text}")
+    # Send POST request with timeout and error handling
+    print("Sending request to generate endpoint...")
+    try:
+        response = requests.post(url, data=data, timeout=60)
+        
+        # Print response
+        print(f"Status code: {response.status_code}")
+        if response.status_code == 200:
+            result = response.json()
+            print(json.dumps(result, indent=2))
+            print(f"\nVideo URL: {result.get('static_video_url')}")
+        else:
+            print(f"Error: {response.text}")
+            
+    except requests.exceptions.Timeout:
+        print("Request timed out. The server might be taking too long to respond.")
+    except requests.exceptions.ConnectionError:
+        print("Connection error. Make sure the Flask server is running at http://127.0.0.1:5000")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
 
 if __name__ == "__main__":
