@@ -2,6 +2,7 @@ import os
 import re
 import uuid
 import subprocess
+import shutil
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 from openai import OpenAI
@@ -14,7 +15,9 @@ client = OpenAI()
 # Directory setup
 OUTPUT_DIR = "generated_scripts"
 VIDEO_DIR = "media/videos"
+STATIC_DIR = "static"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(STATIC_DIR, exist_ok=True)
 
 @app.route("/")
 def index():
@@ -58,7 +61,17 @@ def generate():
         if not os.path.exists(video_path):
             return jsonify({"error": "Video rendering failed"}), 500
 
-        return jsonify({"video_url": f"/video/{os.path.basename(os.path.dirname(video_path))}/{scene_name}.mp4"})
+        # Create a unique name for the video in static directory
+        unique_video_name = f"{script_id}_{scene_name}.mp4"
+        static_video_path = os.path.join(STATIC_DIR, unique_video_name)
+        
+        # Copy the video to static directory
+        shutil.copy2(video_path, static_video_path)
+
+        return jsonify({
+            "video_url": f"/video/{os.path.basename(os.path.dirname(video_path))}/{scene_name}.mp4",
+            "static_video_url": f"/static/{unique_video_name}"
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
