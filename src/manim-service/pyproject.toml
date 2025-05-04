@@ -7,6 +7,6 @@ readme = "README.md"
 dependencies = [
    "openai",
    "flask",
-   "openai",
+   "openai", 
    "werkzeug"
 ]
