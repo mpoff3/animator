@@ -3,10 +3,12 @@ import re
 import uuid
 import subprocess
 from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask_cors import CORS
 from openai import OpenAI
 
 # Initialize Flask and OpenAI
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 client = OpenAI()
 
 # Directory setup
