@@ -72,3 +72,5 @@ docker run -p 5000:5000 \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
   mathlens
 ```
+
+TODO -- fix 'xdg-open'issue
