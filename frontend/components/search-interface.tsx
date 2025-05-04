@@ -88,7 +88,7 @@ export default function SearchInterface() {
       }
     } catch (error) {
       // Handle network errors or other fetch issues
-      setSearchError(`Failed to fetch results: ${error instanceof Error ? error.message : String(error)}`)
+      setSearchError(`Error: ${error instanceof Error ? error.message : String(error)}`)
       console.error("Fetch error:", error)
     } finally {
       setIsSearching(false)
