@@ -42,7 +42,7 @@ except Exception as e:
 # Directory setup
 OUTPUT_DIR = "generated_scripts"
 VIDEO_DIR = "media/videos"
-STATIC_DIR = "static"
+STATIC_DIR = "media"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
 
@@ -114,6 +114,10 @@ def generate():
             f"{scene_name}.mp4",
         )
 
+        video_path = f"media/videos/{script_id}/480p15/GeneratedScene.mp4"
+        logger.info(f"Expected video path: {video_path}")
+
+        """
         # Wait a moment and check multiple times for the video file
         max_attempts = 5
         for attempt in range(max_attempts):
@@ -139,11 +143,11 @@ def generate():
 
         # Copy the video to static directory
         shutil.copy2(video_path, static_video_path)
+        """
 
         return jsonify(
             {
-                "video_url": f"/video/{os.path.basename(os.path.dirname(video_path))}/{scene_name}.mp4",
-                "static_video_url": f"/static/{unique_video_name}",
+                "video_url": video_path,
             }
         )
 
@@ -159,9 +163,9 @@ def serve_video(folder, filename):
     return send_from_directory(os.path.join(VIDEO_DIR, folder), filename)
 
 
-@app.route("/static/<path:filename>")
+@app.route(f"/{STATIC_DIR}/<path:filename>")
 def serve_static(filename):
-    return send_from_directory("static", filename)
+    return send_from_directory(STATIC_DIR, filename)
 
 
 def extract_code(content: str) -> str:
@@ -196,4 +200,4 @@ def auto_fix_code(code: str) -> str:
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
