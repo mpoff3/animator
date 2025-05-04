@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card"
 import VideoPlayer from "@/components/video-player"
 import { motion, AnimatePresence } from "framer-motion"
 import SkeletonLoader from "@/components/skeleton-loader"
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
 
 export default function SearchInterface() {
   const [query, setQuery] = useState("")
@@ -259,7 +261,10 @@ export default function SearchInterface() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
                 <div className="prose dark:prose-invert">
+                  <p className="text-slate-700 dark:text-slate-300">
                   <p className="text-slate-700 dark:text-slate-300">{explanation}</p>
+                    <Latex>{explanation || ''}</Latex>
+                  </p>
                 </div>
               </motion.div>
             </Card>
