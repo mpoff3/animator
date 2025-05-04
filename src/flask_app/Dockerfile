@@ -7,13 +7,12 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
-RUN uv venv
-RUN source .venv/bin/activate
-RUN uv pip install -e .
 
+# Create venv and install dependencies in one step
+RUN uv venv && \
+    /bin/bash -c "source .venv/bin/activate && \
+    uv pip install -e ."
 
-#CMD ["uv", "run", "app.py"]
-
-
-
+# Uncomment to run the app when container starts
+# CMD ["/bin/bash", "-c", "source .venv/bin/activate && python app.py"]
 
