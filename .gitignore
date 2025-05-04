@@ -1,1 +1,9 @@
 .DS_Store
+.venv
+.aider*
+*.egg-info
+__pycache__
+*.egg
+*.mp4
+src/flask_app/generated_scripts
+src/flask_app/media

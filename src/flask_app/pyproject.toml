@@ -1,0 +1,20 @@
+[project]
+name = "animator"
+version = "0.1.0"
+requires-python = ">=3.10"
+description = "Live animations from text prompts"
+readme = "README.md"
+dependencies = [
+   "openai",
+   "flask",
+   "werkzeug",
+   "manim",
+   "latex",
+]
+
+[tool.setuptools]
+py-modules = ["app"]
+
+[tool.setuptools.packages.find]
+include = ["*"]
+exclude = ["media*", "generated_scripts*", "templates*"]
