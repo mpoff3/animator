@@ -13,6 +13,6 @@ RUN uv venv && \
     /bin/bash -c "source .venv/bin/activate && \
     uv pip install -e ."
 
-# Uncomment to run the app when container starts
-# CMD ["/bin/bash", "-c", "source .venv/bin/activate && python app.py"]
+# Run the app when container starts
+CMD ["/bin/bash", "-c", "source .venv/bin/activate && python app.py"]
 

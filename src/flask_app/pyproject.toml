@@ -7,8 +7,12 @@ readme = "README.md"
 dependencies = [
    "openai",
    "flask",
-   "openai",
    "werkzeug",
    "manim",
    "latex",
 ]
+
+[tool.setuptools]
+py-modules = ["app"]
+packages = []
+exclude = ["media", "generated_scripts", "templates"]
