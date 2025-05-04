@@ -76,7 +76,7 @@ export default function SearchInterface() {
     try {
       const formData = new FormData()
       formData.append("question", query)
-      const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
+      const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
         method: "POST",
         body: formData,
       })
