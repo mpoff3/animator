@@ -74,20 +74,20 @@ export default function SearchInterface() {
   }
   const queryVideo = async (query: string) => {
     try {
-      // const formData = new FormData()
-      // formData.append("question", query)
-      // const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
-      //   method: "POST",
-      //   body: formData,
-      // })
-      const response = { // Placeholder for testing
-        ok: true,
-        status: 200,
-        json: async () => ({
-          error: false,
-          video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        })
-      }
+      const formData = new FormData()
+      formData.append("question", query)
+      const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
+        method: "POST",
+        body: formData,
+      })
+      // const response = { // Placeholder for testing
+      //   ok: true,
+      //   status: 200,
+      //   json: async () => ({
+      //     error: false,
+      //     video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      //   })
+      // }
 
       if (!response.ok) {
         // Handle HTTP errors (e.g., 404, 500)
