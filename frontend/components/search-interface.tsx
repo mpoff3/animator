@@ -19,6 +19,7 @@ export default function SearchInterface() {
     explanation: string
     videoUrl: string | null
   } | null>(null)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
   // Load search history from localStorage on component mount
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function SearchInterface() {
 
     setIsSearching(true)
     setSearchResult(null)
+    setSearchError(null) // Clear previous errors
 
     // Add to history (keep only last 5)
     setSearchHistory((prev) => {
@@ -53,17 +55,44 @@ export default function SearchInterface() {
       return newHistory.slice(0, 5)
     })
 
-    // Simulate search delay
-    setTimeout(() => {
-      // In a real implementation, you would fetch data from your API
-      setSearchResult({
-        explanation: `Here's an explanation about "${query}". This would be the detailed text response from your AI system that explains the concept or answers the question in detail. The text would be comprehensive and informative, providing the user with a thorough understanding of the topic they searched for.`,
-        // This would be the URL to your MP4 from docker/cloud storage
-        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    try {
+      const formData = new FormData()
+      formData.append("question", query)
+
+      const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
+        method: "POST",
+        body: formData,
       })
 
+      if (!response.ok) {
+        // Handle HTTP errors (e.g., 404, 500)
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.video_url) {
+        setSearchResult({
+          // Using placeholder for explanation as requested
+          explanation: `Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`,
+          videoUrl: data.video_url,
+        })
+      } else if (data.error) {
+        // Handle errors reported by the backend API
+        setSearchError(`API Error: ${data.error}`)
+        console.error("Backend API error:", data.error)
+      } else {
+        // Handle unexpected response format
+        setSearchError("Unexpected response format from API.")
+        console.error("Unexpected API response:", data)
+      }
+    } catch (error) {
+      // Handle network errors or other fetch issues
+      setSearchError(`Failed to fetch results: ${error instanceof Error ? error.message : String(error)}`)
+      console.error("Fetch error:", error)
+    } finally {
       setIsSearching(false)
-    }, 1500)
+    }
   }
 
   const handleHistoryClick = (historyItem: string) => {
@@ -109,7 +138,7 @@ export default function SearchInterface() {
           {query && (
             <Button
               type="submit"
-              disabled={isSearching}
+              disabled={isSearching || !query.trim()}
               className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black hover:bg-gray-800 text-white"
             >
               {isSearching ? "Searching..." : "Search"}
@@ -163,6 +192,22 @@ export default function SearchInterface() {
         )}
       </AnimatePresence>
 
+      {/* Error message display */}
+      <AnimatePresence>
+        {searchError && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="w-full max-w-2xl mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-center"
+          >
+            {searchError}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Loading indicator or results */}
       <AnimatePresence mode="wait">
         {isSearching ? (
@@ -174,6 +219,7 @@ export default function SearchInterface() {
             transition={{ duration: 0.3 }}
             className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"
           >
+            {/* Keep skeleton for explanation even if not used yet */}
             <SkeletonLoader type="text" />
             <SkeletonLoader type="video" />
           </motion.div>
@@ -186,7 +232,7 @@ export default function SearchInterface() {
             transition={{ duration: 0.5 }}
             className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"
           >
-            {/* Explanation card */}
+            {/* Explanation card (using placeholder) */}
             <Card className="p-6 shadow-md bg-white dark:bg-slate-900 overflow-hidden">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
