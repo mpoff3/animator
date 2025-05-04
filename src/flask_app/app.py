@@ -65,6 +65,10 @@ def generate():
 def serve_video(folder, filename):
     return send_from_directory(os.path.join(VIDEO_DIR, folder), filename)
 
+@app.route("/static/<path:filename>")
+def serve_static(filename):
+    return send_from_directory("static", filename)
+
 def extract_code(content: str) -> str:
     match = re.search(r"```python(.*?)```", content, re.DOTALL)
     if match:
