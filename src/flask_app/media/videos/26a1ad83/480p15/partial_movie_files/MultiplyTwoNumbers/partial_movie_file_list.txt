@@ -1,3 +1,0 @@
-# This file is used internally by FFMPEG.
-file 'file:/Users/tergelm/Documents/Sundai/animator/flask_app/media/videos/26a1ad83/480p15/partial_movie_files/MultiplyTwoNumbers/1185818338_2740539459_223132457.mp4'
-file 'file:/Users/tergelm/Documents/Sundai/animator/flask_app/media/videos/26a1ad83/480p15/partial_movie_files/MultiplyTwoNumbers/624642324_4166842112_707985186.mp4'
