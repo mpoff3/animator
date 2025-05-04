@@ -11,7 +11,9 @@ from flask_cors import CORS
 from openai import OpenAI
 
 # Suppress watchdog/fsevents warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning, module="watchdog.observers")
+warnings.filterwarnings(
+    "ignore", category=DeprecationWarning, module="watchdog.observers"
+)
 warnings.filterwarnings("ignore", module="fsevents")
 
 # Set up logging
@@ -93,9 +95,10 @@ def generate():
         with open(script_file, "w") as f:
             f.write(code)
 
-        print(f"Generated script saved to {script_file}")
+        logger.info(f"Generated script saved to {script_file}")
         # Render using Manim
         try:
+            logger.info(f"Running Manim for {script_file} with scene {scene_name}")
             # Run Manim but don't check for errors since it might still generate the video
             subprocess.run(
                 ["manim", "-pql", script_file, scene_name], capture_output=True
