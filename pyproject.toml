@@ -6,5 +6,7 @@ description = "Live animations from text prompts"
 readme = "README.md"
 dependencies = [
    "openai",
-   "manim",
+   "flask",
+   "openai",
+   "werkzeug"
 ]
