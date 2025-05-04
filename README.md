@@ -66,9 +66,9 @@ You also need latex
 docker build -t mathlens .
 ```
 
+```bash
 docker run -p 5000:5000 \
- -v $(pwd):/app \
+  -v $(pwd):/app \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
- mathlens
-
-TODO -- fix
+  mathlens
+```
