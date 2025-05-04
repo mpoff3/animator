@@ -95,6 +95,7 @@ export default function SearchInterface() {
       }
 
       const data = await response.json()
+      console.log("Response data:", data) // Log the response data for debugging
 
       if (data.video_url) {
         setVideoUrl(data.video_url)
