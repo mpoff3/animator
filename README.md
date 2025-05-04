@@ -60,7 +60,7 @@ uv pip install -e .
 
 You also need latex
 
-### Building and running with docker
+### Building and running with docker locally
 
 ```
 docker build -t mathlens .
@@ -68,5 +68,7 @@ docker build -t mathlens .
 
 docker run -p 5000:5000 \
  -v $(pwd):/app \
-   -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
  mathlens
+
+TODO -- fix

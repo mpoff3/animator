@@ -11,8 +11,7 @@ COPY . /app
 
 # Create venv and install dependencies in one step
 RUN uv venv && \
-    /bin/bash -c "source .venv/bin/activate && \
-    uv pip install -e ."
+    /bin/bash -c "source .venv/bin/activate && uv pip install -e ."
 
 # Expose port 5000
 EXPOSE 5000
