@@ -5,9 +5,14 @@ import subprocess
 import shutil
 import logging
 import traceback
+import warnings
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 from openai import OpenAI
+
+# Suppress watchdog/fsevents warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="watchdog.observers")
+warnings.filterwarnings("ignore", module="fsevents")
 
 # Set up logging
 logging.basicConfig(
