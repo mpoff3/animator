@@ -57,7 +57,20 @@ export default function SearchInterface() {
     await Promise.all([queryExplanation(query), queryVideo(query)])
   }
   const queryExplanation = async (query: string) => {
-    setExplanation(`Video generated for query: "${query}". Explanation feature not yet implemented in backend response.`);
+    const res = await fetch(`/api/getExplanation?query=${encodeURIComponent(query)}`)
+    if (!res.ok) {
+      setSearchError("Failed to fetch explanation.")
+      console.error("Failed to fetch explanation:", res.statusText)
+      return
+    }
+    const data = await res.json()
+    if (!data.success) {
+      setSearchError("Failed to fetch explanation.")
+      console.error("Failed to fetch explanation:", data)
+      return
+    }
+    const explanation = data.explanation || "No explanation available."
+    setExplanation(explanation);
   }
   const queryVideo = async (query: string) => {
     try {
