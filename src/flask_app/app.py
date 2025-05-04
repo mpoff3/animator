@@ -67,7 +67,14 @@ def serve_video(folder, filename):
 
 def extract_code(content: str) -> str:
     match = re.search(r"```python(.*?)```", content, re.DOTALL)
-    return match.group(1).strip() if match else content.strip()
+    if match:
+        return match.group(1).strip()
+    else:
+        # If no code block is found, check if this is a conversational response
+        if not content.strip().startswith("from manim import") and not content.strip().startswith("import"):
+            # This is likely not code at all
+            return "# No valid code was generated\n\nfrom manim import *\n\nclass GeneratedScene(Scene):\n    def construct(self):\n        self.add(Text(\"Please provide a more specific math concept to visualize.\"))"
+        return content.strip()
 
 def auto_fix_code(code: str) -> str:
     # Remove `.T`
