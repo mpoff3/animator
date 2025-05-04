@@ -54,12 +54,27 @@ def generate():
             f.write(code)
 
         # Render using Manim
-        subprocess.run(["manim", "-pql", script_file, scene_name], check=True)
+        try:
+            # Run Manim but don't check for errors since it might still generate the video
+            subprocess.run(["manim", "-pql", script_file, scene_name], capture_output=True)
+        except Exception as e:
+            print(f"Manim execution error: {str(e)}")
+            # Continue anyway to check if video was generated despite errors
 
         # Get final video path
         video_path = os.path.join(VIDEO_DIR, os.path.splitext(os.path.basename(script_file))[0], f"{scene_name}.mp4")
+        
+        # Wait a moment and check multiple times for the video file
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            if os.path.exists(video_path):
+                break
+            print(f"Video not found on attempt {attempt+1}, waiting...")
+            # Wait a second before checking again
+            subprocess.run(["sleep", "1"])
+        
         if not os.path.exists(video_path):
-            return jsonify({"error": "Video rendering failed"}), 500
+            return jsonify({"error": "Video rendering failed - file not found after multiple attempts"}), 500
 
         # Create a unique name for the video in static directory
         unique_video_name = f"{script_id}_{scene_name}.mp4"
