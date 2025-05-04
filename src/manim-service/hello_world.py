@@ -1,4 +1,6 @@
 from manim import *
+import os
+import sys
 
 class HelloWorld(Scene):
     def construct(self):
@@ -18,3 +20,13 @@ class HelloWorld(Scene):
 
 if __name__ == "__main__":
     print("Running Manim Hello World animation...")
+    # Set up command line arguments for manim to render as mp4
+    output_file = "hello_world_animation.mp4"
+    os.environ["PYTHONPATH"] = os.getcwd()
+    sys.argv = ["manim", __file__, "HelloWorld", "-o", output_file, "--media_dir", "./media"]
+    
+    # Import and run the manim CLI
+    from manim.__main__ import main
+    main()
+    
+    print(f"Animation saved as {output_file} in the media directory")
