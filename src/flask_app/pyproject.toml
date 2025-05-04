@@ -10,6 +10,7 @@ dependencies = [
    "werkzeug",
    "manim",
    "latex",
+   "flask-cors"
 ]
 
 [tool.setuptools]
