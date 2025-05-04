@@ -49,3 +49,21 @@ flowchart TD
     class N interface
     class Q1,Q2,Q3 queue
 ```
+
+## Dev setup
+
+```
+uv venv --python=3.10
+source .venv/bin/activate
+uv pip install -e .
+```
+
+You also need latex
+
+### Building and running with docker
+
+```
+docker build -t mathlens .
+```
+
+docker run -p 5000:5000 -v $(pwd):/app mathlens
