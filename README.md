@@ -63,7 +63,7 @@ You also need latex
 ### Building and running with docker locally
 
 ```
-docker build -t mathlens .
+docker build -t mathlens-beta .
 ```
 
 ```bash
@@ -80,7 +80,7 @@ TODO -- fix 'xdg-open'issue
 Tag the image for GCR:
 
 ```
-docker tag mathlens us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens-beta
+docker tag mathlens-beta us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathlens-beta
 ```
 
 Push it:
