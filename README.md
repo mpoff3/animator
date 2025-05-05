@@ -91,25 +91,7 @@ docker push us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathl
 
 ## Calling the function
 
-```
-    const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
-      method: "POST",
-      body: {
-        question: "How do you multiply a matrix by a vector?",
-        prompt: "The prompt...",
-      }
-    });
-```
-
-    This returns the payload:
-
-```json
-    {
-        "video_url": video_path,
-    }
-```
-
-```jacascript
+```javascript
 const manimPrompt = `
 You're an expert educator and Manim CE developer.
 
@@ -142,4 +124,22 @@ Output:
 Respond ONLY with valid Python code
 The script must run with manim -pql script.py {SCENE_NAME} without errors
 `;
+```
+
+```
+    const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+      method: "POST",
+      body: {
+        question: "How do you multiply a matrix by a vector?",
+        prompt: manimPrompt,
+      }
+    });
+```
+
+    This returns the payload:
+
+```json
+    {
+        "video_url": video_path,
+    }
 ```
