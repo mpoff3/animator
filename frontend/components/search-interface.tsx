@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card"
 import VideoPlayer from "@/components/video-player"
 import { motion, AnimatePresence } from "framer-motion"
 import SkeletonLoader from "@/components/skeleton-loader"
+import 'katex/dist/katex.min.css';
+import Latex from 'react-latex-next';
 
 export default function SearchInterface() {
   const [query, setQuery] = useState("")
@@ -74,20 +76,20 @@ export default function SearchInterface() {
   }
   const queryVideo = async (query: string) => {
     try {
-      // const formData = new FormData()
-      // formData.append("question", query)
-      // const response = await fetch("https://mathlens-937226988264.us-central1.run.app/generate", {
-      //   method: "POST",
-      //   body: formData,
-      // })
-      const response = { // Placeholder for testing
-        ok: true,
-        status: 200,
-        json: async () => ({
-          error: false,
-          video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-        })
-      }
+      const formData = new FormData()
+      formData.append("question", query)
+      const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+        method: "POST",
+        body: formData,
+      })
+      // const response = { // Placeholder for testing
+      //   ok: true,
+      //   status: 200,
+      //   json: async () => ({
+      //     error: false,
+      //     video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      //   })
+      // }
 
       if (!response.ok) {
         // Handle HTTP errors (e.g., 404, 500)
@@ -95,6 +97,7 @@ export default function SearchInterface() {
       }
 
       const data = await response.json()
+      console.log("Response data:", data) // Log the response data for debugging
 
       if (data.video_url) {
         setVideoUrl(data.video_url)
@@ -258,7 +261,10 @@ export default function SearchInterface() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
                 <div className="prose dark:prose-invert">
+                  <p className="text-slate-700 dark:text-slate-300">
                   <p className="text-slate-700 dark:text-slate-300">{explanation}</p>
+                    <Latex>{explanation || ''}</Latex>
+                  </p>
                 </div>
               </motion.div>
             </Card>
