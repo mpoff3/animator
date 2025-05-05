@@ -108,3 +108,38 @@ docker push us-west1-docker.pkg.dev/eli5-odewahn-sparktime/llm-experiments/mathl
         "video_url": video_path,
     }
 ```
+
+```jacascript
+const manimPrompt = `
+You're an expert educator and Manim CE developer.
+
+Create a complete and runnable Manim CE script that visually explains the following math question in a clear, step-by-step animation:
+
+Question: "{QUESTION}"
+
+Goals:
+Define a class called GeneratedScene that inherits from Scene
+Break the explanation into 3–6 short steps
+Use Text() to explain each step simply (one sentence max)
+Use MathTex() for all math (e.g., equations, fractions, dot products)
+If applicable, use Matrix() objects to show visual matrix/vector layout
+Use Write, Create, and FadeOut to animate content
+Add pauses using wait(1) or wait(2) after each step
+Visually show the final answer at the end of the scene
+
+Constraints:
+Don't use .dot(), .T, or real math operations
+Don't use numpy, sympy, or external math libraries
+Keep all math symbolic and visually instructive
+
+- Keep visuals uncluttered:
+
+If multiple elements are on screen together, use .next_to() or .shift() to space them
+If an element replaces the previous one, center it (e.g., at ORIGIN, DOWN, or UP) so content stays vertically balanced
+Manim script shouldn't include unneccesary comments
+
+Output:
+Respond ONLY with valid Python code
+The script must run with manim -pql script.py {SCENE_NAME} without errors
+`;
+```
