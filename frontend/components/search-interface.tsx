@@ -16,6 +16,10 @@ import Latex from "react-latex-next";
 // Define the base prompt string outside the component for efficiency
 const baseManimPrompt = "You're an expert educator and Manim CE developer. Create a **complete and runnable Manim CE script** that visually explains the following math question in a clear, step-by-step animation: **Question:** \"{QUESTION}\" Goals:   * Define a class called GeneratedScene that inherits from Scene\n      Break the explanation into 3–6 short steps\n      Use `Text()` to explain each step simply (one sentence max)\n      Use `MathTex()` for all math (e.g., equations, fractions, dot products)\n      If applicable, use `Matrix()` objects to show visual matrix/vector layout\n      Use `Write`, `Create`, and `FadeOut` to animate content\n      Add pauses using `wait(1)` or `wait(2)` after each step\n      Visually show the final answer at the end of the scene\n      Constraints:\n      Don't use `.dot()`, `.T`, or real math operations\n      Don't use numpy, sympy, or external math libraries\n      Keep all math symbolic and visually instructive\n      + Keep visuals uncluttered: \n      If multiple elements are on screen together, use `.next_to()` or `.shift()` to space them\n      If an element replaces the previous one, center it (e.g., at `ORIGIN`, `DOWN`, or `UP`) so content stays vertically balanced\n      Ensure that everything that's being displayed at all time should be centered on the screen vertically and horizontally\n      Nothing should be outside of the bounds of the screen\n      Manim script shouldn't include unneccesary comments\n      Output:\n      Respond ONLY with valid Python code\n      The script must run with `manim -pql script.py {SCENE_NAME}` without errors";
 
+//const manimServerURL = "https://mathlens-beta-937226988264.us-central1.run.app";
+const manimServerURL = "http://127.0.0.1:5000";
+
+
 export default function SearchInterface() {
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
@@ -102,7 +106,7 @@ export default function SearchInterface() {
       formData.append("prompt", manimPrompt); // Use 'prompt' as the field name
 
       // Send request using FormData to external backend
-      const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+      const response = await fetch(`${manimServerURL}/generate`, {
         method: "POST",
         body: formData,
       })
@@ -122,7 +126,7 @@ export default function SearchInterface() {
 
       if (data.video_url) {
         // Prepend the base URL if the backend returns a relative path
-        const fullVideoUrl = data.video_url.startsWith("http") ? data.video_url : `https://mathlens-beta-937226988264.us-central1.run.app/${data.video_url.replace(/^\/+/,'')}`;
+        const fullVideoUrl = data.video_url.startsWith("http") ? data.video_url : `${manimServerURL}/${data.video_url.replace(/^\/+/,'')}`;
         setVideoUrl(fullVideoUrl);
       } else if (data.error) {
         throw new Error(`Video generation API Error: ${data.error}`);
