@@ -10,8 +10,11 @@ import { Card } from "@/components/ui/card"
 import VideoPlayer from "@/components/video-player"
 import { motion, AnimatePresence } from "framer-motion"
 import SkeletonLoader from "@/components/skeleton-loader"
-import 'katex/dist/katex.min.css';
-import Latex from 'react-latex-next';
+import "katex/dist/katex.min.css"; // Ensure KaTeX CSS is imported
+import Latex from "react-latex-next";
+
+// Define the base prompt string outside the component for efficiency
+const baseManimPrompt = "You're an expert educator and Manim CE developer. Create a **complete and runnable Manim CE script** that visually explains the following math question in a clear, step-by-step animation: **Question:** \"{QUESTION}\" Goals:   * Define a class called GeneratedScene that inherits from Scene\n      Break the explanation into 3–6 short steps\n      Use `Text()` to explain each step simply (one sentence max)\n      Use `MathTex()` for all math (e.g., equations, fractions, dot products)\n      If applicable, use `Matrix()` objects to show visual matrix/vector layout\n      Use `Write`, `Create`, and `FadeOut` to animate content\n      Add pauses using `wait(1)` or `wait(2)` after each step\n      Visually show the final answer at the end of the scene\n      Constraints:\n      Don't use `.dot()`, `.T`, or real math operations\n      Don't use numpy, sympy, or external math libraries\n      Keep all math symbolic and visually instructive\n      + Keep visuals uncluttered: \n      If multiple elements are on screen together, use `.next_to()` or `.shift()` to space them\n      If an element replaces the previous one, center it (e.g., at `ORIGIN`, `DOWN`, or `UP`) so content stays vertically balanced\n      Ensure that everything that's being displayed at all time should be centered on the screen vertically and horizontally\n      Nothing should be outside of the bounds of the screen\n      Manim script shouldn't include unneccesary comments\n      Output:\n      Respond ONLY with valid Python code\n      The script must run with `manim -pql script.py {SCENE_NAME}` without errors";
 
 export default function SearchInterface() {
   const [query, setQuery] = useState("")
@@ -56,96 +59,82 @@ export default function SearchInterface() {
       return newHistory.slice(0, 5)
     })
 
-    await Promise.all([queryExplanation(query), queryVideo(query)])
-  }
-  const queryExplanation = async (query: string) => {
-    const res = await fetch(`/api/getExplanation?query=${encodeURIComponent(query)}`)
-    if (!res.ok) {
-      setSearchError("Failed to fetch explanation.")
-      console.error("Failed to fetch explanation:", res.statusText)
-      return
-    }
-    const data = await res.json()
-    if (!data.success) {
-      setSearchError("Failed to fetch explanation.")
-      console.error("Failed to fetch explanation:", data)
-      return
-    }
-    const explanation = data.explanation || "No explanation available."
-    setExplanation(explanation);
-  }
-  const queryVideo = async (query: string) => {
-    try {
-      // const formData = new FormData()
-      // formData.append("question", query)
-      // const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
-      //   method: "POST",
-      //   body: formData,
-      // })
-      const manimPrompt = `You're an expert educator and Manim CE developer. Create a **complete and runnable Manim CE script** that visually explains the following math question in a clear, step-by-step animation: **Question:** "{QUESTION}" Goals:   * Define a class called GeneratedScene that inherits from Scene
-      Break the explanation into 3–6 short steps
-      Use \`Text()\` to explain each step simply (one sentence max)
-      Use \`MathTex()\` for all math (e.g., equations, fractions, dot products)
-      If applicable, use \`Matrix()\` objects to show visual matrix/vector layout
-      Use \`Write\`, \`Create\`, and \`FadeOut\` to animate content
-      Add pauses using \`wait(1)\` or \`wait(2)\` after each step
-      Visually show the final answer at the end of the scene
-      Constraints:
-      Don't use \`.dot()\`, \`.T\`, or real math operations
-      Don't use numpy, sympy, or external math libraries
-      Keep all math symbolic and visually instructive
-      + Keep visuals uncluttered: 
-      If multiple elements are on screen together, use \`.next_to()\` or \`.shift()\` to space them
-      If an element replaces the previous one, center it (e.g., at \`ORIGIN\`, \`DOWN\`, or \`UP\`) so content stays vertically balanced
-      Ensure that everything that's being displayed at all time should be centered on the screen vertically and horizontally
-      Nothing should be outside of the bounds of the screen
-      Manim script shouldn't include unneccesary comments
-      Output:
-      Respond ONLY with valid Python code
-      The script must run with \`manim -pql script.py {SCENE_NAME}\` without errors`;
+    // Trigger both fetches concurrently
+    await Promise.allSettled([
+      queryExplanation(query),
+      queryVideo(query)
+    ]);
 
-  const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
-    method: "POST",
-    body: JSON.stringify({
-        "question": query,
-        "custom_prompt": manimPrompt,
-    })
-});
-console.log("Response:", response) // Log the response for debugging
-  
-      // const response = { // Placeholder for testing
-      //   ok: true,
-      //   status: 200,
-      //   json: async () => ({
-      //     error: false,
-      //     video_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-      //   })
-      // }
+    // Note: Error handling is done within each query function
+    // isSearching will be set to false within queryVideo (assuming it finishes last or handles errors)
+    // If queryExplanation fails, its error state is set, but loading might stop prematurely if queryVideo finishes first.
+    // Consider more robust state management if needed (e.g., tracking loading/error state for each fetch separately)
+    // For now, setting isSearching=false in queryVideo's finally block is kept.
+  }
+
+  const queryExplanation = async (currentQuery: string) => {
+    try {
+      // Fetch explanation from local API endpoint
+      const res = await fetch(`/api/getExplanation?query=${encodeURIComponent(currentQuery)}`)
+      if (!res.ok) {
+        throw new Error(`Explanation fetch failed: ${res.statusText}`);
+      }
+      const data = await res.json()
+      if (!data.success) {
+        throw new Error(data.error || "Failed to fetch explanation from API.");
+      }
+      setExplanation(data.explanation || "No explanation available.");
+    } catch (error) {
+      const errorMsg = `Failed to fetch explanation: ${error instanceof Error ? error.message : String(error)}`;
+      setSearchError((prevError) => prevError ? `${prevError}\n${errorMsg}` : errorMsg); // Append error messages
+      console.error("Explanation fetch error:", error)
+    }
+  }
+
+  const queryVideo = async (currentQuery: string) => {
+    try {
+      // Prepare the prompt by replacing the placeholder with the actual query
+      const manimPrompt = baseManimPrompt.replace("{QUESTION}", currentQuery);
+
+      // Prepare FormData
+      const formData = new FormData();
+      formData.append("question", currentQuery);
+      formData.append("prompt", manimPrompt); // Use 'prompt' as the field name
+
+      // Send request using FormData to external backend
+      const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+        method: "POST",
+        body: formData,
+      })
 
       if (!response.ok) {
-        // Handle HTTP errors (e.g., 404, 500)
-        throw new Error(`HTTP error! status: ${response.status}`)
+        let errorBody = "Unknown error";
+        try {
+            const errorData = await response.json();
+            errorBody = errorData.error || JSON.stringify(errorData);
+        } catch (parseError) {
+            errorBody = await response.text();
+        }
+        throw new Error(`Video generation HTTP error! Status: ${response.status}, Message: ${errorBody}`)
       }
 
       const data = await response.json()
-      console.log("Response data:", data) // Log the response data for debugging
 
       if (data.video_url) {
-        setVideoUrl(data.video_url)
+        // Prepend the base URL if the backend returns a relative path
+        const fullVideoUrl = data.video_url.startsWith("http") ? data.video_url : `https://mathlens-beta-937226988264.us-central1.run.app/${data.video_url.replace(/^\/+/,'')}`;
+        setVideoUrl(fullVideoUrl);
       } else if (data.error) {
-        // Handle errors reported by the backend API
-        setSearchError(`API Error: ${data.error}`)
-        console.error("Backend API error:", data.error)
+        throw new Error(`Video generation API Error: ${data.error}`);
       } else {
-        // Handle unexpected response format
-        setSearchError("Unexpected response format from API.")
-        console.error("Unexpected API response:", data)
+        throw new Error("Unexpected response format from video generation API.");
       }
     } catch (error) {
-      // Handle network errors or other fetch issues
-      setSearchError(`Error: ${error instanceof Error ? error.message : String(error)}`)
-      console.error("Fetch error:", error)
+      const errorMsg = `Failed to generate video: ${error instanceof Error ? error.message : String(error)}`;
+      setSearchError((prevError) => prevError ? `${prevError}\n${errorMsg}` : errorMsg); // Append error messages
+      console.error("Video generation error:", error)
     } finally {
+      // Set searching to false after video attempt finishes (or fails)
       setIsSearching(false)
     }
   }
@@ -164,7 +153,7 @@ console.log("Response:", response) // Log the response for debugging
 
   return (
     <div className="w-full max-w-6xl mx-auto flex flex-col items-center">
-      {/* Simple black logo with animation */}
+      {/* Logo */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -174,7 +163,7 @@ console.log("Response:", response) // Log the response for debugging
         <h1 className="text-4xl md:text-5xl font-bold text-black dark:text-white">Mathlens</h1>
       </motion.div>
 
-      {/* Search input with animation */}
+      {/* Search input */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -202,7 +191,7 @@ console.log("Response:", response) // Log the response for debugging
         </form>
       </motion.div>
 
-      {/* Search history with animation */}
+      {/* Search history */}
       <AnimatePresence>
         {searchHistory.length > 0 && (
           <motion.div
@@ -258,7 +247,10 @@ console.log("Response:", response) // Log the response for debugging
             transition={{ duration: 0.3 }}
             className="w-full max-w-2xl mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-center"
           >
-            {searchError}
+            {/* Display multi-line errors */} 
+            {searchError.split('\n').map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -274,11 +266,10 @@ console.log("Response:", response) // Log the response for debugging
             transition={{ duration: 0.3 }}
             className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"
           >
-            {/* Keep skeleton for explanation even if not used yet */}
             <SkeletonLoader type="text" />
             <SkeletonLoader type="video" />
           </motion.div>
-        ) : (videoUrl || explanation) ? (
+        ) : (explanation || videoUrl) ? (
           <motion.div
             key="results"
             initial={{ opacity: 0, y: 20 }}
@@ -287,15 +278,16 @@ console.log("Response:", response) // Log the response for debugging
             transition={{ duration: 0.5 }}
             className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"
           >
-            {/* Explanation card (using placeholder) */}
+            {/* Explanation card */}
             <Card className="p-6 shadow-md bg-white dark:bg-slate-900 overflow-hidden">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
-                <div className="prose dark:prose-invert">
-                  <p className="text-slate-700 dark:text-slate-300">
-                  <p className="text-slate-700 dark:text-slate-300">{explanation}</p>
-                    <Latex>{explanation || ''}</Latex>
-                  </p>
+                <div className="prose dark:prose-invert max-w-none">
+                  {explanation ? (
+                    <Latex>{explanation}</Latex>
+                  ) : (
+                    <p className="text-slate-500 dark:text-slate-400">No explanation available.</p>
+                  )}
                 </div>
               </motion.div>
             </Card>
@@ -323,3 +315,4 @@ console.log("Response:", response) // Log the response for debugging
     </div>
   )
 }
+
