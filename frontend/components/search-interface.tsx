@@ -108,7 +108,7 @@ export default function SearchInterface() {
     method: "POST",
     body: JSON.stringify({
         question: query,
-        prompt: manimPrompt,
+        custom_prompt: manimPrompt,
     })
 });
 console.log("Response:", response) // Log the response for debugging
