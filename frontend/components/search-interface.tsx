@@ -74,12 +74,42 @@ export default function SearchInterface() {
   }
   const queryVideo = async (query: string) => {
     try {
-      const formData = new FormData()
-      formData.append("question", query)
-      const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
-        method: "POST",
-        body: formData,
-      })
+      // const formData = new FormData()
+      // formData.append("question", query)
+      // const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+      //   method: "POST",
+      //   body: formData,
+      // })
+      const manimPrompt = `You're an expert educator and Manim CE developer. Create a **complete and runnable Manim CE script** that visually explains the following math question in a clear, step-by-step animation: **Question:** "{QUESTION}" Goals:   * Define a class called GeneratedScene that inherits from Scene
+      Break the explanation into 3–6 short steps
+      Use \`Text()\` to explain each step simply (one sentence max)
+      Use \`MathTex()\` for all math (e.g., equations, fractions, dot products)
+      If applicable, use \`Matrix()\` objects to show visual matrix/vector layout
+      Use \`Write\`, \`Create\`, and \`FadeOut\` to animate content
+      Add pauses using \`wait(1)\` or \`wait(2)\` after each step
+      Visually show the final answer at the end of the scene
+      Constraints:
+      Don't use \`.dot()\`, \`.T\`, or real math operations
+      Don't use numpy, sympy, or external math libraries
+      Keep all math symbolic and visually instructive
+      + Keep visuals uncluttered: 
+      If multiple elements are on screen together, use \`.next_to()\` or \`.shift()\` to space them
+      If an element replaces the previous one, center it (e.g., at \`ORIGIN\`, \`DOWN\`, or \`UP\`) so content stays vertically balanced
+      Ensure that everything that's being displayed at all time should be centered on the screen vertically and horizontally
+      Nothing should be outside of the bounds of the screen
+      Manim script shouldn't include unneccesary comments
+      Output:
+      Respond ONLY with valid Python code
+      The script must run with \`manim -pql script.py {SCENE_NAME}\` without errors`;
+
+  const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
+    method: "POST",
+    body: {
+        question: query,
+        prompt: manimPrompt,
+    }
+});
+  
       // const response = { // Placeholder for testing
       //   ok: true,
       //   status: 200,
