@@ -124,10 +124,13 @@ export default function SearchInterface() {
 
       const data = await response.json()
 
+      console.log("Video generation response:", data)
+
       if (data.video_url) {
         // Prepend the base URL if the backend returns a relative path
         const fullVideoUrl = data.video_url.startsWith("http") ? data.video_url : `${manimServerURL}/${data.video_url.replace(/^\/+/,'')}`;
         setVideoUrl(fullVideoUrl);
+        console.log("Video URL:", fullVideoUrl);
       } else if (data.error) {
         throw new Error(`Video generation API Error: ${data.error}`);
       } else {

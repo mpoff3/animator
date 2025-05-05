@@ -1,8 +1,8 @@
 # animator
 
-The goal of this project is to creat an way to create math visualizations in Manim using an LLM. The baisc UI will look like thhis:
+The goal of this project is to create math visualizations in Manim using an LLM.
 
-![docs/ui-mockup.png](docs/ui-mockup-v0.png)
+![docs/mathlens-demo-720.gif](docs/mathlens-demo-720.gif)
 
 The essential idea of the flow of the system is:
 
@@ -70,7 +70,7 @@ docker build -t mathlens-beta .
 docker run -p 5000:5000 \
   -v $(pwd):/app \
   -e OPENAI_API_KEY=$OPENAI_API_KEY \
-  mathlens
+  mathlens-beta
 ```
 
 TODO -- fix 'xdg-open'issue
