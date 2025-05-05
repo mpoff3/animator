@@ -96,6 +96,14 @@ export default function SearchInterface() {
   }
 
   const queryVideo = async (currentQuery: string) => {
+    if (process.env.NEXT_PUBLIC_SKIP_VIDEO_GENERATION) {
+      // For development/testing purposes, use a mock video URL
+      console.log("Using mock video response")
+      setVideoUrl("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
+      setIsSearching(false)
+      return
+    }
+
     try {
       // Prepare the prompt by replacing the placeholder with the actual query
       const manimPrompt = baseManimPrompt.replace("{QUESTION}", currentQuery);
