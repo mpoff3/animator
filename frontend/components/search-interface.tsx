@@ -106,11 +106,12 @@ export default function SearchInterface() {
 
   const response = await fetch("https://mathlens-beta-937226988264.us-central1.run.app/generate", {
     method: "POST",
-    body: {
+    body: JSON.stringify({
         question: query,
         prompt: manimPrompt,
-    }
+    })
 });
+console.log("Response:", response) // Log the response for debugging
   
       // const response = { // Placeholder for testing
       //   ok: true,
