@@ -31,6 +31,8 @@ export async function GET(req: NextRequest) {
     ],
   });
 
+  // console.log('Response:', response.output_text);
+
   return Response.json({
     success: true,
     // explanation: `Video generated for query: "${query}". Explanation feature not yet implemented via LLM.`
