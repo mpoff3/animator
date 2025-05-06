@@ -11,10 +11,13 @@ import VideoPlayer from "@/components/video-player"
 import { motion, AnimatePresence } from "framer-motion"
 import SkeletonLoader from "@/components/skeleton-loader"
 import "katex/dist/katex.min.css"; // Ensure KaTeX CSS is imported
-import Latex from "react-latex-next";
+import Markdown from "react-markdown"
+import rehypeKatex from "rehype-katex"
+import remarkMath from "remark-math"
 
 // Define the base prompt string outside the component for efficiency
 const baseManimPrompt = "You're an expert educator and Manim CE developer. Create a **complete and runnable Manim CE script** that visually explains the following math question in a clear, step-by-step animation: **Question:** \"{QUESTION}\" Goals:   * Define a class called GeneratedScene that inherits from Scene\n      Break the explanation into 3–6 short steps\n      Use `Text()` to explain each step simply (one sentence max)\n      Use `MathTex()` for all math (e.g., equations, fractions, dot products)\n      If applicable, use `Matrix()` objects to show visual matrix/vector layout\n      Use `Write`, `Create`, and `FadeOut` to animate content\n      Add pauses using `wait(1)` or `wait(2)` after each step\n      Visually show the final answer at the end of the scene\n      Constraints:\n      Don't use `.dot()`, `.T`, or real math operations\n      Don't use numpy, sympy, or external math libraries\n      Keep all math symbolic and visually instructive\n      + Keep visuals uncluttered: \n      If multiple elements are on screen together, use `.next_to()` or `.shift()` to space them\n      If an element replaces the previous one, center it (e.g., at `ORIGIN`, `DOWN`, or `UP`) so content stays vertically balanced\n      Ensure that everything that's being displayed at all time should be centered on the screen vertically and horizontally\n      Nothing should be outside of the bounds of the screen\n      Manim script shouldn't include unneccesary comments\n      Output:\n      Respond ONLY with valid Python code\n      The script must run with `manim -pql script.py {SCENE_NAME}` without errors";
+const mockExplanation = `This is important: \\[ c_{ij} = \\sum_{k=1}^n a_{ik} \\cdot b_{kj} \\]`;
 
 //const manimServerURL = "https://mathlens-beta-937226988264.us-central1.run.app";
 const manimServerURL = "http://127.0.0.1:5000";
@@ -76,7 +79,18 @@ export default function SearchInterface() {
     // For now, setting isSearching=false in queryVideo's finally block is kept.
   }
 
+  const prepLatexForParse = (inp: string) => {
+    return inp
+      .replaceAll(/\\\[/g, "$$$$").replaceAll(/\\\]/g, "$$$$")
+      .replaceAll(/\\\(/g, "$$").replaceAll(/\\\)/g, "$$")
+      ;
+  }
+
   const queryExplanation = async (currentQuery: string) => {
+    if (process.env.NEXT_PUBLIC_SKIP_EXPLANATION_FETCH) {
+      setExplanation(prepLatexForParse(mockExplanation))
+      return
+    }
     try {
       // Fetch explanation from local API endpoint
       const res = await fetch(`/api/getExplanation?query=${encodeURIComponent(currentQuery)}`)
@@ -87,7 +101,7 @@ export default function SearchInterface() {
       if (!data.success) {
         throw new Error(data.error || "Failed to fetch explanation from API.");
       }
-      setExplanation(data.explanation || "No explanation available.");
+      setExplanation(prepLatexForParse(data.explanation || "No explanation available."));
     } catch (error) {
       const errorMsg = `Failed to fetch explanation: ${error instanceof Error ? error.message : String(error)}`;
       setSearchError((prevError) => prevError ? `${prevError}\n${errorMsg}` : errorMsg); // Append error messages
@@ -297,9 +311,12 @@ export default function SearchInterface() {
             <Card className="p-6 shadow-md bg-white dark:bg-slate-900 overflow-hidden">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.2 }}>
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 dark:text-slate-200">Explanation</h2>
-                <div className="prose dark:prose-invert max-w-none">
+                <div className="markdown max-w-none">
                   {explanation ? (
-                    <Latex>{explanation}</Latex>
+                    // <Latex>{explanation}</Latex>
+                    <Markdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                      {explanation}
+                    </Markdown>
                   ) : (
                     <p className="text-slate-500 dark:text-slate-400">No explanation available.</p>
                   )}

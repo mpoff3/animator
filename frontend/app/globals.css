@@ -92,3 +92,18 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.markdown {
+  p {
+    @apply mt-4;
+  }
+  ol {
+    @apply list-decimal list-inside /*py-4*/ /*mt-0*/;
+  }
+  ol li {
+    @apply my-4;
+  }
+  ol li p {
+    @apply inline;
+  }
+}
